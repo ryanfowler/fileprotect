@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"time"
 
 	"github.com/peterbourgon/ff/v3/ffcli"
 	"golang.org/x/crypto/argon2"
@@ -136,9 +135,7 @@ func decryptSecret(password []byte, ciphertextHex string) ([]byte, error) {
 }
 
 func newAEAD(password, salt []byte) (cipher.AEAD, error) {
-	start := time.Now()
 	key := argon2.IDKey(password, salt[:], 4, 128*1024, 4, 32)
-	fmt.Fprintf(os.Stderr, "Took: %v\n", time.Since(start))
 	return chacha20poly1305.NewX(key)
 }
 
