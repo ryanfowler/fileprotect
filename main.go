@@ -94,22 +94,17 @@ func readPassword() ([]byte, error) {
 
 func encryptSecret(password, plaintext []byte) (string, error) {
 	var prefix [40]byte
-
-	passSalt := prefix[:16]
-	if err := readRandom(passSalt); err != nil {
+	if _, err := io.ReadFull(rand.Reader, prefix[:]); err != nil {
 		return "", err
 	}
 
+	passSalt := prefix[:16]
 	aead, err := newAEAD(password, passSalt)
 	if err != nil {
 		return "", err
 	}
 
 	nonce := prefix[16:]
-	if err = readRandom(nonce); err != nil {
-		return "", err
-	}
-
 	ciphertext := aead.Seal(prefix[:], nonce, plaintext, nil)
 	return hex.EncodeToString(ciphertext), nil
 }
@@ -137,12 +132,4 @@ func decryptSecret(password []byte, ciphertextHex string) ([]byte, error) {
 func newAEAD(password, salt []byte) (cipher.AEAD, error) {
 	key := argon2.IDKey(password, salt, 4, 128*1024, 4, 32)
 	return chacha20poly1305.NewX(key)
-}
-
-func readRandom(b []byte) error {
-	_, err := io.ReadFull(rand.Reader, b)
-	if err != nil {
-		return fmt.Errorf("reading random bytes: %w", err)
-	}
-	return nil
 }
