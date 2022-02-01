@@ -29,3 +29,10 @@ fileprotect secret decrypt 2b86dc46601e0046df8bb891f702fa9fd11edc9301e44b51db556
 
 The `decrypt` command will also ask for the password you used to encrypt the
 data, and, if successful, output the result.
+
+### How it works
+
+`fileprotect` uses the [argon2id](https://en.wikipedia.org/wiki/Argon2) key
+derivation function to hash your password. It takes the resulting 32 byte hash
+and uses that as the key to the [xchacha20-poly1305](https://en.wikipedia.org/wiki/ChaCha20-Poly1305)
+authenticated encryption algorithm.

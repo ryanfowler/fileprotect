@@ -135,7 +135,7 @@ func decryptSecret(password []byte, ciphertextHex string) ([]byte, error) {
 }
 
 func newAEAD(password, salt []byte) (cipher.AEAD, error) {
-	key := argon2.IDKey(password, salt[:], 4, 128*1024, 4, 32)
+	key := argon2.IDKey(password, salt, 4, 128*1024, 4, 32)
 	return chacha20poly1305.NewX(key)
 }
 
