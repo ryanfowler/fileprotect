@@ -92,20 +92,20 @@ func readPassword() ([]byte, error) {
 	return password, nil
 }
 
+var zeroNonce [chacha20poly1305.NonceSize]byte
+
 func encryptSecret(password, plaintext []byte) (string, error) {
-	var prefix [40]byte
-	if _, err := io.ReadFull(rand.Reader, prefix[:]); err != nil {
+	var passSalt [16]byte
+	if _, err := io.ReadFull(rand.Reader, passSalt[:]); err != nil {
 		return "", err
 	}
 
-	passSalt := prefix[:16]
-	aead, err := newAEAD(password, passSalt)
+	aead, err := newAEAD(password, passSalt[:])
 	if err != nil {
 		return "", err
 	}
 
-	nonce := prefix[16:]
-	ciphertext := aead.Seal(prefix[:], nonce, plaintext, nil)
+	ciphertext := aead.Seal(passSalt[:], zeroNonce[:], plaintext, nil)
 	return hex.EncodeToString(ciphertext), nil
 }
 
@@ -115,7 +115,7 @@ func decryptSecret(password []byte, ciphertextHex string) ([]byte, error) {
 		return nil, err
 	}
 
-	if len(ciphertext) < 40 {
+	if len(ciphertext) < 16 {
 		return nil, errors.New("invalid ciphertext")
 	}
 
@@ -125,11 +125,10 @@ func decryptSecret(password []byte, ciphertextHex string) ([]byte, error) {
 		return nil, err
 	}
 
-	nonce := ciphertext[16:40]
-	return aead.Open(nil, nonce, ciphertext[40:], nil)
+	return aead.Open(nil, zeroNonce[:], ciphertext[16:], nil)
 }
 
 func newAEAD(password, salt []byte) (cipher.AEAD, error) {
 	key := argon2.IDKey(password, salt, 8, 256*1024, 4, 32)
-	return chacha20poly1305.NewX(key)
+	return chacha20poly1305.New(key)
 }
