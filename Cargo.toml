@@ -1,0 +1,16 @@
+[package]
+name = "fileprotect"
+version = "0.1.0"
+edition = "2021"
+
+[profile.release]
+debug = false
+lto = true
+opt-level = 3
+
+[dependencies]
+argon2 = { version = "0.4", features = ["parallel", "std"] }
+base64 = { version = "0.13" }
+chacha20poly1305 = { version = "0.9" }
+rpassword = { version = "6" }
+structopt = { version = "0.3" }
