@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/cipher"
 	"crypto/rand"
-	"encoding/hex"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -106,11 +106,11 @@ func encryptSecret(password, plaintext []byte) (string, error) {
 	}
 
 	ciphertext := aead.Seal(passSalt[:], zeroNonce[:], plaintext, nil)
-	return hex.EncodeToString(ciphertext), nil
+	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
-func decryptSecret(password []byte, ciphertextHex string) ([]byte, error) {
-	ciphertext, err := hex.DecodeString(ciphertextHex)
+func decryptSecret(password []byte, ciphertextB64 string) ([]byte, error) {
+	ciphertext, err := base64.StdEncoding.DecodeString(ciphertextB64)
 	if err != nil {
 		return nil, err
 	}
@@ -129,6 +129,6 @@ func decryptSecret(password []byte, ciphertextHex string) ([]byte, error) {
 }
 
 func newAEAD(password, salt []byte) (cipher.AEAD, error) {
-	key := argon2.IDKey(password, salt, 8, 256*1024, 4, 32)
+	key := argon2.IDKey(password, salt, 8, 256*1024, 4, chacha20poly1305.KeySize)
 	return chacha20poly1305.New(key)
 }
