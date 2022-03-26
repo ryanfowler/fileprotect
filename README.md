@@ -19,12 +19,12 @@ fileprotect secret encrypt "this is a secret"
 ```
 
 The `encrypt` command will ask for a password to encrypt the secret with, and
-will then output the encrypted result in hexadecimal format.
+will then output the encrypted result in base64 format.
 
 To decrypt your data, run the command:
 
 ```
-fileprotect secret decrypt 2b86dc46601e0046df8bb891f702fa9fd11edc9301e44
+fileprotect secret decrypt 3vAnXv6kKuA6WVunj6O9zdqhWtgSnzGAbzTL9AHV3nqu0HBPkCE
 ```
 
 The `decrypt` command will also ask for the password you used to encrypt the
